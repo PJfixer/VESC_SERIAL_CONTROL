@@ -6,7 +6,7 @@
 #define DEBUG
 
 nunchuckPackage nunchuck;
- dataPackage data;
+Custom_dataPackage telemetry;
  int RPM_VESC =0;
  extern uint8_t TX_mode ;
 
@@ -721,7 +721,7 @@ void nrf24_TX(void *args) {
 		        temp = nrf24_retransmissionCount();
 		        usart1_printf("> Retranmission count: %d \n",temp);
 
-				vTaskDelay(pdMS_TO_TICKS(5000));
+				vTaskDelay(pdMS_TO_TICKS(700));
 
 
 	}
@@ -730,7 +730,7 @@ void nrf24_TX(void *args) {
 
 void nrf24_RX(void *args) {
 	(void)args;
-	uint8_t payload[32] ;
+
 	for(;;)
 	{
 		// Block execution until notified
@@ -738,9 +738,9 @@ void nrf24_RX(void *args) {
 		if(nrf24_dataReady())
 		{
 			uint8_t temp = getAvailablePaySize();
-			usart1_printf("%d bytes available \n ",temp);
-			nrf24_getData(&payload,temp);
-
+			usart1_printf("%d BYTE AVAILABLE \n ",temp);
+			nrf24_getData(&telemetry,temp);
+			usart1_printf("telemetry.Dual_inpVoltage : ");usart1_printDouble(telemetry.Dual_inpVoltage,100);usart1_printf("\n");
 
 		}
 	}

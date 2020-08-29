@@ -8,6 +8,16 @@
 #include <task.h>
 #include <queue.h>
 
+typedef struct  {
+		float Mot1_avgMotorCurrent;
+		float Mot2_avgMotorCurrent;
+		float Dul_avgInputCurrent;
+		long Mot1_rpm;
+		float Dual_inpVoltage;
+		float Dual_ampHours;
+		float Dual_ampHoursCharged;
+		long Mot1_tachometerAbs;
+	}Custom_dataPackage;
 
 #include "datatypes.h"
 /** Struct to store the telemetry data returned by the VESC */

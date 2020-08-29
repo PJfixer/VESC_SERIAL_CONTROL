@@ -1,6 +1,7 @@
 
 
 #include "usart1.h"
+#include "nrf24.h"
 
 extern TaskHandle_t h_task_usart1;
 
@@ -74,7 +75,6 @@ void usart1_isr(void)
 	BaseType_t woken = pdFALSE;
 	//gpio_toggle(GPIOC,GPIO13);
 
-
 	/* Check if we were called because of RXNE. */
 	if (((USART_CR1(USART1) & USART_CR1_RXNEIE) != 0) &&
 	    ((USART_SR(USART1) & USART_SR_RXNE) != 0)) {
@@ -122,6 +122,7 @@ void usart1_task(void *args) {
 	(void)args;
 	 int16_t parsed_int = 0;
 	 uint8_t temp[10];
+	 uint8_t data[2];
 		for(;;)
 		{
 			// Block execution until notified
@@ -137,6 +138,22 @@ void usart1_task(void *args) {
 				usart1_printf("%d \n",parsed_int);
 				usart1_printf("mode : %d \n",TX_mode);
 			break;
+			case 'C':  //set cruise control on
+
+				nunchuck.valueY = parsed_int;
+				nunchuck.lowerButton = true; // cruise control false
+				TX_mode = 0; // set to nunchucnk package mode
+				usart1_printf("%d \n",parsed_int);
+				usart1_printf("mode : %d \n",TX_mode);
+			break;
+			case 'P':  //cruise control off
+
+					nunchuck.valueY = parsed_int;
+					nunchuck.lowerButton = false; // cruise control false
+					TX_mode = 0; // set to nunchucnk package mode
+					usart1_printf("%d \n",parsed_int);
+					usart1_printf("mode : %d \n",TX_mode);
+				break;
 			case 'R':  //case its a RPM
 				memcpy(temp,&payload_usart1[1],lenPayload_usart1-2);
 				parsed_int = atoi((const char*)temp);
@@ -144,6 +161,19 @@ void usart1_task(void *args) {
 				TX_mode = 1; // set to RPM package mode
 				usart1_printf("%d \n",parsed_int);
 				usart1_printf("mode : %d \n",TX_mode);
+
+			break;
+			case 'T':  //case its a telemetry request
+
+				data[0] = 3; // set the type of frame (telemetry request)
+				usart1_printf("sending a %d bytes payload \n",sizeof(data));
+				nrf24_send(&data,sizeof(data)); //send payload
+				while(nrf24_isSending())
+				{
+
+
+				}
+				nrf24_powerUpRx();
 
 			break;
 			default:
